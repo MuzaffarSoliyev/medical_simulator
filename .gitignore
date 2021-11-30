@@ -5,3 +5,6 @@ env/
 venv
 .idea
 .env
+/data/benign
+/data/malignant
+/data/normal

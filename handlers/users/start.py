@@ -42,4 +42,5 @@ async def get_phone_number(message: types.Message, state: FSMContext):
     registration_data = await state.get_data()
     await message.answer(
         f"First name: {registration_data['first_name']}\nLast name: {registration_data['last_name']}\nPhone number: {registration_data['phone_number']}\n", reply_markup=types.ReplyKeyboardRemove())
-    await state.finish()
+    await UserRegistration.next()
+    await message.answer("Наберите /go чтобы начать тренировку")
