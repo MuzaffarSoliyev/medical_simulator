@@ -11,16 +11,12 @@ class UserRegistration(StatesGroup):
 
     t2 = State()
     t21 = State()
-    t22 = State()
 
     t3 = State()
     t31 = State()
-    t32 = State()
 
     t4 = State()
     t41 = State()
-    t42 = State()
 
     t5 = State()
     t51 = State()
-    t52 = State()

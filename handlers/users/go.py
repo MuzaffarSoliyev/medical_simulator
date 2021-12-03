@@ -22,11 +22,11 @@ async def begin_test(message: types.Message, state: FSMContext):
         't1_image_path': path,
         'target_1': label
     })
-    await dp.bot.send_photo(message.chat.id, img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels)
     await UserRegistration.next()
 
 
-@dp.message_handler(state=UserRegistration.t11)
+@dp.message_handler(state=UserRegistration.t11, content_types='text')
 async def test_1(message: types.Message, state: FSMContext):
     data = await state.get_data()
     path = data['t1_image_path']
@@ -44,32 +44,27 @@ async def test_1(message: types.Message, state: FSMContext):
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await dp.bot.send_photo(message.chat.id, img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels)
     await UserRegistration.next()
 
 
-@dp.message_handler(state=UserRegistration.t12)
+@dp.message_handler(state=UserRegistration.t12, content_types='text')
 async def test_12(message: types.Message, state: FSMContext):
     answer_2 = message.text
     await state.update_data({
         't1_answer_2': answer_2
     })
-    await UserRegistration.next()
-
-
-@dp.message_handler(state=UserRegistration.t2)
-async def test_2(message: types.Message, state: FSMContext):
     path, label = get_image_path()
     img = open(path, 'br')
     await state.update_data({
         't2_image_path': path,
         'target_2': label
     })
-    await dp.bot.send_photo(message.chat.id, img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels)
     await UserRegistration.next()
 
 
-@dp.message_handler(state=UserRegistration.t21)
+@dp.message_handler(state=UserRegistration.t2, content_types='text')
 async def test_21(message: types.Message, state: FSMContext):
     data = await state.get_data()
     path = data['t2_image_path']
@@ -87,32 +82,28 @@ async def test_21(message: types.Message, state: FSMContext):
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await dp.bot.send_photo(message.chat.id, img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels)
     await UserRegistration.next()
 
 
-@dp.message_handler(state=UserRegistration.t22)
+@dp.message_handler(state=UserRegistration.t21, content_types='text')
 async def test_22(message: types.Message, state: FSMContext):
     answer_2 = message.text
     await state.update_data({
         't2_answer_2': answer_2
     })
-    await UserRegistration.next()
-
-
-@dp.message_handler(state=UserRegistration.t3)
-async def test_3(message: types.Message, state: FSMContext):
     path, label = get_image_path()
     img = open(path, 'br')
     await state.update_data({
         't3_image_path': path,
         'target_3': label
     })
-    await dp.bot.send_photo(message.chat.id, img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels)
     await UserRegistration.next()
 
 
-@dp.message_handler(state=UserRegistration.t31)
+
+@dp.message_handler(state=UserRegistration.t3, content_types='text')
 async def test_31(message: types.Message, state: FSMContext):
     data = await state.get_data()
     path = data['t3_image_path']
@@ -130,32 +121,28 @@ async def test_31(message: types.Message, state: FSMContext):
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await dp.bot.send_photo(message.chat.id, img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels)
     await UserRegistration.next()
 
 
-@dp.message_handler(state=UserRegistration.t32)
+@dp.message_handler(state=UserRegistration.t31, content_types='text')
 async def test_32(message: types.Message, state: FSMContext):
     answer_2 = message.text
     await state.update_data({
         't3_answer_2': answer_2
     })
-    await UserRegistration.next()
-
-
-@dp.message_handler(state=UserRegistration.t4)
-async def test_4(message: types.Message, state: FSMContext):
     path, label = get_image_path()
     img = open(path, 'br')
     await state.update_data({
         't4_image_path': path,
         'target_4': label
     })
-    await dp.bot.send_photo(message.chat.id, img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels)
     await UserRegistration.next()
 
 
-@dp.message_handler(state=UserRegistration.t41)
+
+@dp.message_handler(state=UserRegistration.t4, content_types='text')
 async def test_41(message: types.Message, state: FSMContext):
     data = await state.get_data()
     path = data['t3_image_path']
@@ -173,32 +160,27 @@ async def test_41(message: types.Message, state: FSMContext):
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await dp.bot.send_photo(message.chat.id, img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels)
     await UserRegistration.next()
 
 
-@dp.message_handler(state=UserRegistration.t42)
+@dp.message_handler(state=UserRegistration.t41, content_types='text')
 async def test_42(message: types.Message, state: FSMContext):
     answer_2 = message.text
     await state.update_data({
         't4_answer_2': answer_2
     })
-    await UserRegistration.next()
-
-
-@dp.message_handler(state=UserRegistration.t5)
-async def test_5(message: types.Message, state: FSMContext):
     path, label = get_image_path()
     img = open(path, 'br')
     await state.update_data({
         't5_image_path': path,
         'target_5': label
     })
-    await dp.bot.send_photo(message.chat.id, img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels)
     await UserRegistration.next()
 
 
-@dp.message_handler(state=UserRegistration.t51)
+@dp.message_handler(state=UserRegistration.t5, content_types='text')
 async def test_41(message: types.Message, state: FSMContext):
     data = await state.get_data()
     path = data['t5_image_path']
@@ -216,11 +198,11 @@ async def test_41(message: types.Message, state: FSMContext):
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await dp.bot.send_photo(message.chat.id, img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels)
     await UserRegistration.next()
 
 
-@dp.message_handler(state=UserRegistration.t52)
+@dp.message_handler(state=UserRegistration.t51, content_types='text')
 async def test_52(message: types.Message, state: FSMContext):
     answer_2 = message.text
     await state.update_data({
@@ -235,7 +217,7 @@ async def test_52(message: types.Message, state: FSMContext):
         f"5. target: {data['target_5']}  answer_5: {data['t5_answer_1']}  answer_2: {data['t5_answer_2']}\n\n" +
         "Чтобы ещё раз пройти тренировку наберите /go"
     )
-    await UserRegistration.t1
+    await state.set_state(UserRegistration.t1)
 
 
 
