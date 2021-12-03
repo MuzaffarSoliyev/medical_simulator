@@ -13,6 +13,12 @@ import matplotlib.pyplot as plt
 
 RESULT_DATA_DIR = 'results/'
 
+OUTPUTS = {
+    0: 'Normal',
+    1: 'Benign',
+    2: 'Malignant'
+}
+
 
 @dp.message_handler(Command(commands=['go']), state=UserRegistration.t1)
 async def begin_test(message: types.Message, state: FSMContext):
@@ -37,14 +43,14 @@ async def test_1(message: types.Message, state: FSMContext):
     image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
     transformed_image = transformations(image).unsqueeze(0)
     output_class = model(transformed_image).argmax().item()
-    gradcamed_image = get_gradcam_image(image, output_class, gradcamplusplus)
+    # gradcamed_image = get_gradcam_image(image, output_class, gradcamplusplus)
     f = plt.figure()
     save_path = RESULT_DATA_DIR + path.split('/')[2]
-    plt.imsave(save_path, gradcamed_image)
+    plt.imsave(save_path, transformed_image)
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await message.answer_photo(img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels, caption=f"Ответ модели: <b>{OUTPUTS[output_class]}</b>", parse_mode='HTML')
     await UserRegistration.next()
 
 
@@ -75,14 +81,14 @@ async def test_21(message: types.Message, state: FSMContext):
     image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
     transformed_image = transformations(image).unsqueeze(0)
     output_class = model(transformed_image).argmax().item()
-    gradcamed_image = get_gradcam_image(image, output_class, gradcamplusplus)
+    # gradcamed_image = get_gradcam_image(image, output_class, gradcamplusplus)
     f = plt.figure()
     save_path = RESULT_DATA_DIR + path.split('/')[2]
-    plt.imsave(save_path, gradcamed_image)
+    plt.imsave(save_path, transformed_image)
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await message.answer_photo(img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels, caption=f"Ответ модели: <b>{OUTPUTS[output_class]}</b>", parse_mode='HTML')
     await UserRegistration.next()
 
 
@@ -114,14 +120,14 @@ async def test_31(message: types.Message, state: FSMContext):
     image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
     transformed_image = transformations(image).unsqueeze(0)
     output_class = model(transformed_image).argmax().item()
-    gradcamed_image = get_gradcam_image(image, output_class, gradcamplusplus)
+    # gradcamed_image = get_gradcam_image(image, output_class, gradcamplusplus)
     f = plt.figure()
     save_path = RESULT_DATA_DIR + path.split('/')[2]
-    plt.imsave(save_path, gradcamed_image)
+    plt.imsave(save_path, transformed_image)
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await message.answer_photo(img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels, caption=f"Ответ модели: <b>{OUTPUTS[output_class]}</b>", parse_mode='HTML')
     await UserRegistration.next()
 
 
@@ -145,7 +151,7 @@ async def test_32(message: types.Message, state: FSMContext):
 @dp.message_handler(state=UserRegistration.t4, content_types='text')
 async def test_41(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    path = data['t3_image_path']
+    path = data['t4_image_path']
     await state.update_data({
         't4_answer_1': message.text
     })
@@ -153,14 +159,14 @@ async def test_41(message: types.Message, state: FSMContext):
     image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
     transformed_image = transformations(image).unsqueeze(0)
     output_class = model(transformed_image).argmax().item()
-    gradcamed_image = get_gradcam_image(image, output_class, gradcamplusplus)
+    # gradcamed_image = get_gradcam_image(image, output_class, gradcamplusplus)
     f = plt.figure()
     save_path = RESULT_DATA_DIR + path.split('/')[2]
-    plt.imsave(save_path, gradcamed_image)
+    plt.imsave(save_path, transformed_image)
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await message.answer_photo(img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels, caption=f"Ответ модели: <b>{OUTPUTS[output_class]}</b>", parse_mode='HTML')
     await UserRegistration.next()
 
 
@@ -191,14 +197,14 @@ async def test_41(message: types.Message, state: FSMContext):
     image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
     transformed_image = transformations(image).unsqueeze(0)
     output_class = model(transformed_image).argmax().item()
-    gradcamed_image = get_gradcam_image(image, output_class, gradcamplusplus)
+    # gradcamed_image = get_gradcam_image(image, output_class, gradcamplusplus)
     f = plt.figure()
     save_path = RESULT_DATA_DIR + path.split('/')[2]
-    plt.imsave(save_path, gradcamed_image)
+    plt.imsave(save_path, transformed_image)
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await message.answer_photo(img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels, caption=f"Ответ модели: <b>{OUTPUTS[output_class]}</b>", parse_mode='HTML')
     await UserRegistration.next()
 
 
