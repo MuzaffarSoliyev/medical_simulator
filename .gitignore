@@ -8,3 +8,4 @@ venv
 /data/benign
 /data/malignant
 /data/normal
+results
