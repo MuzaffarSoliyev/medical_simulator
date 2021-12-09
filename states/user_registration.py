@@ -5,6 +5,9 @@ class UserRegistration(StatesGroup):
     first_name = State()
     last_name = State()
     phone_number = State()
+
+    mode = State()
+
     t1 = State()
     t11 = State()
     t12 = State()

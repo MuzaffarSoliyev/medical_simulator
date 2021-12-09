@@ -2,7 +2,7 @@ from aiogram import types
 from loader import dp
 from aiogram.dispatcher.filters import Command, Text
 from ai_model.get_image import get_image_path
-from keyboards.default import labels
+from keyboards.default import labels, modes
 from aiogram.dispatcher import FSMContext
 from states.user_registration import UserRegistration
 from skimage import io
@@ -24,12 +24,25 @@ OUTPUTS_TO_INT = {
     'malignant': 2
 }
 
+MODES_DICT = {
+    "Рак головного мозга": 0,
+    "Рак груди": 1
+}
 
-@dp.message_handler(Command(commands=['go']), state=UserRegistration.t1)
+
+@dp.message_handler(Command(commands=['go']), state=UserRegistration.mode)
 async def begin_test(message: types.Message, state: FSMContext):
+    await message.answer("Выберите опцию для тренировки", reply_markup=modes)
+    await UserRegistration.next()
+
+
+@dp.message_handler(state=UserRegistration.t1, content_types='text')
+async def test_1(message: types.Message, state: FSMContext):
+	mode = MODES_DICT[message.text]
     path, label = get_image_path()
     img = open(path, 'br')
     await state.update_data({
+    	'mode': mode,
         't1_image_path': path,
         'target_1': label,
         'model_score': 0,
