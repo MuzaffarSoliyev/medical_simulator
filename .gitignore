@@ -8,4 +8,8 @@ venv
 /data/benign
 /data/malignant
 /data/normal
+/data/glioma_tumor
+/data/meningioma_tumor
+/data/no_tumor
+/data/pituitary_tumor
 results
