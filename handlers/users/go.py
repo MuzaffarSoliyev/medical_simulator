@@ -2,31 +2,53 @@ from aiogram import types
 from loader import dp
 from aiogram.dispatcher.filters import Command, Text
 from ai_model.get_image import get_image_path
-from keyboards.default import labels, modes
+from keyboards.default import breat_labels, brain_labels, modes
 from aiogram.dispatcher import FSMContext
 from states.user_registration import UserRegistration
 from skimage import io
 import numpy as np
-from ai_model import model, transformations, gradcamplusplus, get_gradcam_image
+from ai_model import get_models, transformations, get_gradcam_image
 import cv2
 import matplotlib.pyplot as plt
 
 RESULT_DATA_DIR = 'results/'
 
 OUTPUTS = {
-    0: 'Normal',
-    1: 'Benign',
-    2: 'Malignant'
+    0: {
+        0: 'Glioma tumor',
+        1: 'Meningioma tumor',
+        2: 'No Tumor',
+        3: 'Pituitary tumor'
+    },
+    1: {
+        0: 'Normal',
+        1: 'Benign',
+        2: 'Malignant'},
+
 }
+
 OUTPUTS_TO_INT = {
-    'normal': 0,
-    'benign': 1,
-    'malignant': 2
+    0: {
+        'glioma tumor': 0,
+        'meningioma tumor': 1,
+        'no tumor': 2,
+        'pituitary tumor': 3
+    },
+    1: {
+        'normal': 0,
+        'benign': 1,
+        'malignant': 2},
+
 }
 
 MODES_DICT = {
     "Рак головного мозга": 0,
     "Рак груди": 1
+}
+
+labels = {
+    0: brain_labels,
+    1: breat_labels
 }
 
 
@@ -38,18 +60,20 @@ async def begin_test(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=UserRegistration.t1, content_types='text')
 async def test_1(message: types.Message, state: FSMContext):
-	mode = MODES_DICT[message.text]
-    path, label = get_image_path()
+    mode = MODES_DICT[message.text]
+    print("MODE", mode)
+    path, label = get_image_path(mode)
+    print("Label", mode)
     img = open(path, 'br')
     await state.update_data({
-    	'mode': mode,
+        'mode': mode,
         't1_image_path': path,
         'target_1': label,
         'model_score': 0,
         'user_score_1': 0,
         'user_score_2': 0
     })
-    await message.answer_photo(img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels[mode])
     await message.answer("Выберите правильный вариант.")
     await UserRegistration.next()
 
@@ -64,8 +88,10 @@ async def test_1(message: types.Message, state: FSMContext):
     image = io.imread(path, as_gray=False).astype(np.float32)
     image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
     transformed_image = transformations(image).unsqueeze(0)
+    model, gradcamplusplus = get_models(data['mode'])
     output_class = model(transformed_image).argmax().item()
-    if output_class == OUTPUTS_TO_INT[data['target_1']]:
+    print("output_class", output_class)
+    if output_class == OUTPUTS_TO_INT[data['mode']][data['target_1']]:
         async with state.proxy() as elem:
             elem['model_score'] += 1
     if data['t1_answer_1'].lower() == data['target_1']:
@@ -76,10 +102,12 @@ async def test_1(message: types.Message, state: FSMContext):
     f = plt.figure()
     save_path = RESULT_DATA_DIR + path.split('/')[2]
     plt.imsave(save_path, gradcamed_image)
+    # plt.imsave(save_path, transformed_image)
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await message.answer_photo(img, reply_markup=labels, caption=f"Ответ модели: <b>{OUTPUTS[output_class]}</b>", parse_mode='HTML')
+    await message.answer_photo(img, reply_markup=labels[data['mode']], caption=f"Ответ модели: <b>{OUTPUTS[data['mode']][output_class]}</b>",
+                               parse_mode='HTML')
     await message.answer("Выберите правильный вариант.")
     await UserRegistration.next()
 
@@ -95,13 +123,13 @@ async def test_12(message: types.Message, state: FSMContext):
     if data['t1_answer_2'].lower() == data['target_1']:
         async with state.proxy() as elem:
             elem['user_score_2'] += 1
-    path, label = get_image_path()
+    path, label = get_image_path(data['mode'])
     img = open(path, 'br')
     await state.update_data({
         't2_image_path': path,
         'target_2': label
     })
-    await message.answer_photo(img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels[data['mode']])
     await message.answer("Выберите правильный вариант.")
     await UserRegistration.next()
 
@@ -116,8 +144,9 @@ async def test_21(message: types.Message, state: FSMContext):
     image = io.imread(path, as_gray=False).astype(np.float32)
     image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
     transformed_image = transformations(image).unsqueeze(0)
+    model, gradcamplusplus = get_models(data['mode'])
     output_class = model(transformed_image).argmax().item()
-    if output_class == OUTPUTS_TO_INT[data['target_2']]:
+    if output_class == OUTPUTS_TO_INT[data['mode']][data['target_2']]:
         async with state.proxy() as elem:
             elem['model_score'] += 1
     if data['t2_answer_1'].lower() == data['target_2']:
@@ -128,10 +157,12 @@ async def test_21(message: types.Message, state: FSMContext):
     f = plt.figure()
     save_path = RESULT_DATA_DIR + path.split('/')[2]
     plt.imsave(save_path, gradcamed_image)
+    # plt.imsave(save_path, transformed_image)
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await message.answer_photo(img, reply_markup=labels, caption=f"Ответ модели: <b>{OUTPUTS[output_class]}</b>", parse_mode='HTML')
+    await message.answer_photo(img, reply_markup=labels[data['mode']], caption=f"Ответ модели: <b>{OUTPUTS[data['mode']][output_class]}</b>",
+                               parse_mode='HTML')
     await message.answer("Выберите правильный вариант.")
     await UserRegistration.next()
 
@@ -147,16 +178,15 @@ async def test_22(message: types.Message, state: FSMContext):
     if data['t2_answer_2'].lower() == data['target_2']:
         async with state.proxy() as elem:
             elem['user_score_2'] += 1
-    path, label = get_image_path()
+    path, label = get_image_path(data['mode'])
     img = open(path, 'br')
     await state.update_data({
         't3_image_path': path,
         'target_3': label
     })
-    await message.answer_photo(img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels[data['mode']])
     await message.answer("Выберите правильный вариант.")
     await UserRegistration.next()
-
 
 
 @dp.message_handler(state=UserRegistration.t3, content_types='text')
@@ -169,8 +199,9 @@ async def test_31(message: types.Message, state: FSMContext):
     image = io.imread(path, as_gray=False).astype(np.float32)
     image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
     transformed_image = transformations(image).unsqueeze(0)
+    model, gradcamplusplus = get_models(data['mode'])
     output_class = model(transformed_image).argmax().item()
-    if output_class == OUTPUTS_TO_INT[data['target_3']]:
+    if output_class == OUTPUTS_TO_INT[data['mode']][data['target_3']]:
         async with state.proxy() as elem:
             elem['model_score'] += 1
     if data['t3_answer_1'].lower() == data['target_3']:
@@ -181,10 +212,12 @@ async def test_31(message: types.Message, state: FSMContext):
     f = plt.figure()
     save_path = RESULT_DATA_DIR + path.split('/')[2]
     plt.imsave(save_path, gradcamed_image)
+    # plt.imsave(save_path, transformed_image)
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await message.answer_photo(img, reply_markup=labels, caption=f"Ответ модели: <b>{OUTPUTS[output_class]}</b>", parse_mode='HTML')
+    await message.answer_photo(img, reply_markup=labels[data['mode']], caption=f"Ответ модели: <b>{OUTPUTS[data['mode']][output_class]}</b>",
+                               parse_mode='HTML')
     await message.answer("Выберите правильный вариант.")
     await UserRegistration.next()
 
@@ -200,16 +233,15 @@ async def test_32(message: types.Message, state: FSMContext):
     if data['t3_answer_2'].lower() == data['target_3']:
         async with state.proxy() as elem:
             elem['user_score_2'] += 1
-    path, label = get_image_path()
+    path, label = get_image_path(data['mode'])
     img = open(path, 'br')
     await state.update_data({
         't4_image_path': path,
         'target_4': label
     })
-    await message.answer_photo(img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels[data['mode']])
     await message.answer("Выберите правильный вариант.")
     await UserRegistration.next()
-
 
 
 @dp.message_handler(state=UserRegistration.t4, content_types='text')
@@ -222,8 +254,9 @@ async def test_41(message: types.Message, state: FSMContext):
     image = io.imread(path, as_gray=False).astype(np.float32)
     image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
     transformed_image = transformations(image).unsqueeze(0)
+    model, gradcamplusplus = get_models(data['mode'])
     output_class = model(transformed_image).argmax().item()
-    if output_class == OUTPUTS_TO_INT[data['target_4']]:
+    if output_class == OUTPUTS_TO_INT[data['mode']][data['target_4']]:
         async with state.proxy() as elem:
             elem['model_score'] += 1
     if data['t4_answer_1'].lower() == data['target_4']:
@@ -234,10 +267,12 @@ async def test_41(message: types.Message, state: FSMContext):
     f = plt.figure()
     save_path = RESULT_DATA_DIR + path.split('/')[2]
     plt.imsave(save_path, gradcamed_image)
+    # plt.imsave(save_path, transformed_image)
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await message.answer_photo(img, reply_markup=labels, caption=f"Ответ модели: <b>{OUTPUTS[output_class]}</b>", parse_mode='HTML')
+    await message.answer_photo(img, reply_markup=labels[data['mode']], caption=f"Ответ модели: <b>{OUTPUTS[data['mode']][output_class]}</b>",
+                               parse_mode='HTML')
     await message.answer("Выберите правильный вариант.")
     await UserRegistration.next()
 
@@ -253,13 +288,13 @@ async def test_42(message: types.Message, state: FSMContext):
     if data['t4_answer_2'].lower() == data['target_4']:
         async with state.proxy() as elem:
             elem['user_score_2'] += 1
-    path, label = get_image_path()
+    path, label = get_image_path(data['mode'])
     img = open(path, 'br')
     await state.update_data({
         't5_image_path': path,
         'target_5': label
     })
-    await message.answer_photo(img, reply_markup=labels)
+    await message.answer_photo(img, reply_markup=labels[data['mode']])
     await message.answer("Выберите правильный вариант.")
     await UserRegistration.next()
 
@@ -274,8 +309,9 @@ async def test_41(message: types.Message, state: FSMContext):
     image = io.imread(path, as_gray=False).astype(np.float32)
     image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
     transformed_image = transformations(image).unsqueeze(0)
+    model, gradcamplusplus = get_models(data['mode'])
     output_class = model(transformed_image).argmax().item()
-    if output_class == OUTPUTS_TO_INT[data['target_5']]:
+    if output_class == OUTPUTS_TO_INT[data['mode']][data['target_5']]:
         async with state.proxy() as elem:
             elem['model_score'] += 1
     if data['t5_answer_1'].lower() == data['target_5']:
@@ -286,10 +322,12 @@ async def test_41(message: types.Message, state: FSMContext):
     f = plt.figure()
     save_path = RESULT_DATA_DIR + path.split('/')[2]
     plt.imsave(save_path, gradcamed_image)
+    # plt.imsave(save_path, transformed_image)
     f.clear()
     plt.close(f)
     img = open(save_path, 'br')
-    await message.answer_photo(img, reply_markup=labels, caption=f"Ответ модели: <b>{OUTPUTS[output_class]}</b>", parse_mode='HTML')
+    await message.answer_photo(img, reply_markup=labels[data['mode']], caption=f"Ответ модели: <b>{OUTPUTS[data['mode']][output_class]}</b>",
+                               parse_mode='HTML')
     await message.answer("Выберите правильный вариант.")
     await UserRegistration.next()
 
@@ -311,7 +349,4 @@ async def test_52(message: types.Message, state: FSMContext):
         f" Точнсть второго ответа пользователя: <b>{data['user_score_2']}/5 </b>\n\n" +
         "Чтобы ещё раз пройти тренировку наберите /go", parse_mode='HTML'
     )
-    await state.set_state(UserRegistration.t1)
-
-
-
+    await state.set_state(UserRegistration.mode)

@@ -17,11 +17,24 @@ transformations = transforms.Compose([
     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 ])
 
-with open('breat_tumor_model.pkl', 'rb') as f:
-    model = pickle.load(f)
+def get_models(model_type):
+    if model_type == 1:
+        with open('breat_tumor_model.pkl', 'rb') as f:
+            model = pickle.load(f)
+            model.eval()
 
-with open('gradcam.pkl', 'rb') as f:
-    gradcamplusplus = pickle.load(f)
+        with open('gradcam_breat.pkl', 'rb') as f:
+            gradcamplusplus = pickle.load(f)
+
+    elif model_type == 0:
+        with open('densenet_model.pkl', 'rb') as f:
+            model = torch.load(f)
+            model.eval()
+
+        with open('gradcam_brain.pkl', 'rb') as f:
+            gradcamplusplus = pickle.load(f)
+
+    return model, gradcamplusplus
 
 
 def get_gradcam_image(image, target_categ, gradcam):
